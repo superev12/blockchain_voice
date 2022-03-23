@@ -1,7 +1,6 @@
 {
-  "presets": ["@babel/env", "@babel/typescript"],
+  "presets": ["@babel/env"],
   "plugins": [
-    "syntax-trailing-function-commas",
     "@babel/proposal-class-properties",
     "@babel/proposal-object-rest-spread"
   ]
