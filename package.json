@@ -5,12 +5,6 @@
   "main": ".eslintrc.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/webpack --config ./config/webpack.config.js",
-    "dev_client": "./node_modules/.bin/webpack-dev-server --config ./config/webpack.config.js",
-    "server": "node server.js",
-    "dev": "concurrently --kill-others-on-fail \"npm run dev_client\" \"npm run server\"",
-    "buildDev": "rm -rf dist && webpack --mode development --config ./config/webpack.server.config.js && ./node_modules/.bin/webpack --mode development --config ./config/webpack.config.js",
-    "buildProd": "rm -rf dist && webpack --mode production --config ./config/webpack.server.config.js && ./node_modules/.bin/webpack --mode production --config ./config/webpack.config.js",
     "start": "node server.js"
   },
   "author": "",
@@ -21,6 +15,7 @@
     "babel-loader": "^8.2.4",
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.70.0",
+    "webpack-cdn-plugin": "^3.3.1",
     "webpack-cli": "^4.9.2",
     "webpack-dev-middleware": "^5.3.1",
     "webpack-dev-server": "^4.7.4",

@@ -1,14 +1,14 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-    mode: 'development',
+    mode: "development",
     entry: {
-        main: path.resolve(__dirname, '../src/main.js'),
+        main: path.resolve(__dirname, "../src/main.js"),
     },
     output: {
-        path: path.resolve(__dirname, '../dist'),
-        filename: 'bundle.js',
+        path: path.resolve(__dirname, "../dist"),
+        filename: "bundle.js",
         clean: true,
     },
     module: {
@@ -17,9 +17,9 @@ module.exports = {
                 test: /\.m?js$/,
                 exclude: /(node_modules|bower_components)/,
                 use: {
-                    loader: 'babel-loader',
+                    loader: "babel-loader",
                     options: {
-                        presets: ['@babel/preset-env']
+                        presets: ["@babel/preset-env"]
                     },
                 },
             },
@@ -27,14 +27,14 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'View',
-            filename: 'index.html',
-            template: path.resolve(__dirname, '../src/index.html'),
+            title: "View",
+            filename: "index.html",
+            template: path.resolve(__dirname, "../src/index.html"),
         }),
         new HtmlWebpackPlugin({
-            title: 'Submit',
-            filename: 'submit.html',
-            template: path.resolve(__dirname, '../src/submit.html'),
+            title: "Submit",
+            filename: "submit.html",
+            template: path.resolve(__dirname, "../src/submit.html"),
         }),
     ],
     resolve: {
