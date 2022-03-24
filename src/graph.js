@@ -21,15 +21,24 @@ export default class Graph {
             prerender: true,
         });
         this.renderer.run();
+        console.log(this.graph);
     }
 
     addNode(name) {
-        //console.log("adding name", name);
         this.graph.addNode(name);
+    }
+
+    removeNode(name) {
+        this.graph.removeNode(name);
     }
 
     linkNodes(name1, name2) {
         this.graph.addLink(name1, name2);
+    }
+
+    removeLink(name1, name2) {
+        const linkId = this.graph.getLink(name1, name2);
+        this.graph.removeLink(linkId);
     }
 
     getNodeColour(node) {

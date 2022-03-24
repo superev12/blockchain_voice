@@ -61,6 +61,9 @@ function actionLoop(actors) {
         }
     }
     console.log("removed names is", removedNames);
+    for (let removedName in removedNames) {
+        graph.removeNode(removedName);
+    }
 
     const addedNames = [];
     for (let i = 0; i < added.length; i++) {
@@ -69,6 +72,12 @@ function actionLoop(actors) {
         }
     }
     console.log("added names is", addedNames);
+    for (let addedName in addedNames) {
+        graph.addNode(addedName);
+    }
+    for (let addedName in addedNames) {
+        linkNodeToGraph(addedName);
+    }
 
     // Add lie to an actor
     // Communicate from actor to another
