@@ -1,24 +1,31 @@
 import "path";
 
 import Actor from "./actor";
-import Graph from "./graph";
-
+import Data from "./data";
+import {getRandomInt} from "./utils";
 
 const testActor = new Actor("Marley");
 testActor.currentChains = [["a", "a", "b", "a"], ["a", "a", "a", "a"]];
-const actors = [new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), testActor];
-const graph = new Graph();
-console.log(graph);
+const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
 
-registerActors(actors);
+//setInterval(() => actionLoop(), 5000);
+actionTruth();
+actionLie();
+actionTruth();
+actionTruth();
+actionTruth();
+actionLie();
+actionTruth();
+sleep(2000).then(() => {
+    //code
+    actionCommunicate();
+});
 
-setInterval(() => actionLoop(actors), 5000);
 
 // Add all actors to the graph as nodes
 function registerActors(actors) {
     for (let actor of actors) {
-        graph.addNode(actor.name);
-        //graph.markNode(actor.name);
+        graph.addActor(actor.name);
 
         const actorChains = actor.currentChains;
         for (let i = 0; i < actorChains.length; i++) {
@@ -28,18 +35,18 @@ function registerActors(actors) {
             for (let j = 0; j < actorChain.length; j++) {
                 const blockName = actorChain[j];
                 const fullBlockName = getBlockNodeName(actor.name,i,j);
-                graph.addNode(fullBlockName);
+                //graph.addNode(fullBlockName);
             }
             // Link nodes
             for (let j = 0; j < actorChain.length - 1; j++) {
                 const currentBlockName = getBlockNodeName(actor.name,i,j);
                 const nextBlockName = getBlockNodeName(actor.name,i,j+1);
-                graph.linkNodes(currentBlockName, nextBlockName);
+                //graph.linkNodes(currentBlockName, nextBlockName);
             }
             // Link first Node
             if (actorChain.length >= 1) {
                 const nextBlockName = getBlockNodeName(actor.name, i, 0);
-                graph.linkNodes(actor.name, nextBlockName);
+                //graph.linkNodes(actor.name, nextBlockName);
             }
         }
     }
@@ -47,60 +54,51 @@ function registerActors(actors) {
 
 
 // Define action loop
-function actionLoop(actors) {
-    // Add truth to an actor
-    console.log(actors)
-    const actorIndex = getRandomInt(0, actors.length-1);
-    console.log(actorIndex)
-    const {removed, added} = actors[actorIndex].addBlock("a");
+function actionLoop() {
+    const randomActionIndex = getRandomInt(0, 2);
 
-    const removedNames = [];
-    for (let i = 0; i < removed.length; i++) {
-        for (let j = 0; j < removed[i].length; j++) {
-            removedNames.push(getBlockNodeName(actors[actorIndex].name, i, j));
-        }
-    }
-    console.log("removed names is", removedNames);
-    for (let removedName in removedNames) {
-        graph.removeNode(removedName);
-    }
-
-    const addedNames = [];
-    for (let i = 0; i < added.length; i++) {
-        for (let j = 0; j < added[i].length; j++) {
-            addedNames.push(getBlockNodeName(actors[actorIndex].name, i, j));
-        }
-    }
-    console.log("added names is", addedNames);
-    for (let addedName in addedNames) {
-        graph.addNode(addedName);
-    }
-    for (let addedName in addedNames) {
-        linkNodeToGraph(addedName);
+    switch(randomActionIndex) {
+        case 0:
+            // Add truth to an actor
+            actionTruth();
+            break;
+        case 1:
+            // Add lie to an actor
+            actionLie();
+            break;
+        case 2:
+            // Communicate from actor to another
+            actionCommunicate();
+            break;
     }
 
-    // Add lie to an actor
-    // Communicate from actor to another
+
 }
 
-function linkNodeToGraph(name) {
-    const nodeNames = name.split('.');
-    const [actorName, blockchainIndex, blockIndex] = nodeNames;
+function actionTruth() {
+    const actorIndex = getRandomInt(0, data.actors.length-1);
+    console.log("adding truth to", data.actors[actorIndex].name);
+    data.addBlock("truth", data.actors[actorIndex].name, 0);
+}
 
-    if (blockIndex === 0) {
-        graph.linkNodes(actor.name, name);
-        return
+function actionLie() {
+    const actorIndex = getRandomInt(0, data.actors.length-1);
+    console.log("adding lie to", data.actors[actorIndex].name);
+    data.addBlock("lie", data.actors[actorIndex].name, 0);
+}
+
+function actionCommunicate() {
+    const fromActorIndex = getRandomInt(0, data.actors.length-1);
+    const fromActorName = data.actors[fromActorIndex].name;
+    let toActorIndex;
+    while (toActorIndex === fromActorIndex || !toActorIndex) {
+        toActorIndex = getRandomInt(0, data.actors.length-1);
     }
-
-    graph.linkNodes(getBlockNodeName(actorName, blockchainIndex, blockIndex-1), name);
+    const toActorName = data.actors[toActorIndex].name;
+    console.log("communicating from", data.actors[fromActorIndex].name, "to", data.actors[toActorIndex].name);
+    data.communicate(fromActorName, toActorName);
 }
 
-function getBlockNodeName(actorName, blockchainIndex, blockIndex) {
-    return `${actorName}.${blockchainIndex}.${blockIndex}`;
-}
-
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }

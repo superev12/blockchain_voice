@@ -24,7 +24,10 @@
   "dependencies": {
     "concurrently": "^7.0.0",
     "express": "^4.17.3",
+    "graphology": "^0.24.1",
+    "graphology-layout-force": "^0.2.4",
     "path-browserify": "^1.0.1",
+    "sigma": "^2.2.0",
     "tone": "^14.7.77",
     "vivagraphjs": "^0.12.0"
   }

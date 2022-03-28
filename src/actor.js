@@ -5,24 +5,25 @@ export default class Actor {
         this.name = name;
     }
 
-    addBlock(content) {
-        const oldChains = this.currentChains;
+    addBlock(index, content) {
+        if (index < 0 || index >= this.currentChains.length) return;
 
-        const firstChain = this.currentChains[0];
-        const newChain = firstChain.concat(content);
-        this.currentChains = [newChain];
+        this.currentChains[index].push(content);
 
-        return {removed: oldChains, added: newChain}
+        return true;
     }
 
-    addBlockChain(chain) {
-        if (chain.length < this.currentChains[0].length) return;
+    addBlockchain(chain) {
+        if (chain.length < this.currentChains[0]?.length) {
+            return "nothing";
+        }
 
-        if (chain.length === this.currentChains[0].length) {
+        if (chain.length === this.currentChains[0]?.length) {
             this.currentChains = this.currentChains.push(chain);
-            return;
+            return "appended";
         }
 
         this.currentChains = [chain];
+        return "replaced";
     }
 }
