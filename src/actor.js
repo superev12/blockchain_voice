@@ -19,7 +19,7 @@ export default class Actor {
         }
 
         if (chain.length === this.currentChains[0]?.length) {
-            this.currentChains = this.currentChains.push(chain);
+            this.currentChains = this.currentChains.concat([chain]);
             return "appended";
         }
 

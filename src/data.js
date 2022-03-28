@@ -27,6 +27,7 @@ export default class Data {
 
         let targetBlockIndex;
         const targetChain = this.actors[targetActorIndex].currentChains[targetChainIndex] 
+        const purgeExistingGraph = targetChain.length > 1;
         if (targetChain === undefined || targetChain.length === 0) {
             targetBlockIndex = 0
         } else {
@@ -40,7 +41,19 @@ export default class Data {
 
         // Update graph
         {
-            this.graph.addBlock(newBlock, targetActorName, targetChainIndex, targetBlockIndex);
+            if (purgeExistingGraph) {
+                this.graph.removeChainsFromParent(targetActorName);
+                for (let blockIndex = 0; blockIndex < this.actors[targetActorIndex].currentChains[targetChainIndex].length; blockIndex ++) {
+                    this.graph.addBlock(
+                        this.actors[targetActorIndex].currentChains[targetChainIndex][blockIndex],
+                        targetActorName,
+                        targetChainIndex,
+                        blockIndex
+                    );
+                }
+            } else {
+                this.graph.addBlock(newBlock, targetActorName, targetChainIndex, targetBlockIndex);
+            }
         }
     }
 
@@ -53,6 +66,7 @@ export default class Data {
         console.log("Blockchains to be sent", fromActorBlockchains)
         let addBlockchainOutput;
         for (let blockchain of fromActorBlockchains) {
+            console.log("blockchain to be sent", blockchain);
             addBlockchainOutput = this.actors[toActorIndex].addBlockchain(blockchain)
         }
 
@@ -95,6 +109,7 @@ export default class Data {
                 }
             }
         }
+        console.log(this.actors);
 
     }
 

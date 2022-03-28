@@ -8,18 +8,20 @@ const testActor = new Actor("Marley");
 testActor.currentChains = [["a", "a", "b", "a"], ["a", "a", "a", "a"]];
 const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
 
-//setInterval(() => actionLoop(), 5000);
-actionTruth();
-actionLie();
-actionTruth();
-actionTruth();
-actionTruth();
-actionLie();
-actionTruth();
-sleep(2000).then(() => {
-    //code
-    actionCommunicate();
-});
+//setInterval(() => actionLoop(), 2000);
+
+/*
+actionLoop();
+actionLoop();
+actionLoop();
+actionLoop();
+actionLoop();
+actionLoop();
+actionLoop();
+actionLoop();
+actionLoop();
+*/
+
 
 
 // Add all actors to the graph as nodes
@@ -73,6 +75,10 @@ function actionLoop() {
     }
 
 
+}
+
+function reproducableActions() {
+    data.addBlock("truth", data.actors[actorIndex].name, 0);
 }
 
 function actionTruth() {
