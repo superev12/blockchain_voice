@@ -67,15 +67,18 @@ export default class Data {
 
         // Update data
         const fromActorBlockchains = this.actors[fromActorIndex].currentChains;
-        console.log("Blockchains to be sent", fromActorBlockchains)
+        const uniqueFromActorBlockchains = fromActorBlockchains.filter((chain) => {
+            return !this.actors[toActorIndex].currentChains.includes(chain);
+        });
+        console.log("Blockchains to be sent", uniqueFromActorBlockchains)
         let addBlockchainOutput;
-        for (let blockchain of fromActorBlockchains) {
+        for (let blockchain of uniqueFromActorBlockchains) {
             console.log("blockchain to be sent", blockchain);
             addBlockchainOutput = this.actors[toActorIndex].addBlockchain(blockchain)
         }
 
         // Shared data
-        const numberOfSharedBlockchains = fromActorBlockchains.length;
+        const numberOfSharedBlockchains = uniqueFromActorBlockchains.length;
         const operation = addBlockchainOutput;
         console.log(numberOfSharedBlockchains)
 
