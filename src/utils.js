@@ -26,3 +26,20 @@ export function getColourFromBlockContent(content) {
     return "red";
 }
 
+export function weightedRandom(items, weights) {
+    if (items.length !== weights.length) return false;
+
+    const summedWeight = weights.reduce((a, b) => a+b);
+    console.log("summedWeight", summedWeight);
+    const randomInRange = Random.real(0, summedWeight)(randomEngine);
+    console.log("random number was", randomInRange);
+    let cumulativeWeights = 0;
+    for (let i = 0; i < items.length; i++) {
+        cumulativeWeights += weights[i];
+        if (randomInRange <= cumulativeWeights) {
+            return items[i];
+        }
+    }
+    return items[items.length];
+}
+

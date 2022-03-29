@@ -2,9 +2,15 @@ import "path";
 
 import Actor from "./actor";
 import Data from "./data";
-import {getRandomInt} from "./utils";
+import {getRandomInt, weightedRandom} from "./utils";
 
-const stepTimeMs = 200;
+const stepTimeMs = 400;
+const actionWeights = {
+    truth: 2,
+    lie: 1,
+    communicate: 10,
+}
+debugger;
 
 const testActor = new Actor("Marley");
 testActor.currentChains = [["a", "a", "b", "a"], ["a", "a", "a", "a"]];
@@ -61,18 +67,20 @@ function registerActors(actors) {
 
 // Define action loop
 function actionLoop() {
-    const randomActionIndex = getRandomInt(0, 2);
+    const randomAction = weightedRandom(Object.keys(actionWeights), Object.values(actionWeights));
 
-    switch(randomActionIndex) {
-        case 0:
+    console.log("performing action", randomAction)
+
+    switch(randomAction) {
+        case "truth":
             // Add truth to an actor
             actionTruth();
             break;
-        case 1:
+        case "lie":
             // Add lie to an actor
             actionLie();
             break;
-        case 2:
+        case "communicate":
             // Communicate from actor to another
             actionCommunicate();
             break;
