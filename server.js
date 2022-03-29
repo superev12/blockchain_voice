@@ -26,7 +26,8 @@ app.get("/submit", (req, res) => {
 });
 
 
-const server = app.listen(process.env.port);
+//const server = app.listen(process.env.port);
+const server = app.listen(8080)
 const portNumber = server.address().port;
 
 console.log("Server listening on", portNumber);

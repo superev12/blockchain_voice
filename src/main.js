@@ -4,22 +4,26 @@ import Actor from "./actor";
 import Data from "./data";
 import {getRandomInt} from "./utils";
 
+const stepTimeMs = 200;
+
 const testActor = new Actor("Marley");
 testActor.currentChains = [["a", "a", "b", "a"], ["a", "a", "a", "a"]];
 const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
 
-//setInterval(() => actionLoop(), 2000);
+setInterval(() => {
+    actionLoop()
+    sleep(stepTimeMs).then(() => {
+        actionVerify();
+    });
+
+}, stepTimeMs*2);
 
 /*
-actionLoop();
-actionLoop();
-actionLoop();
-actionLoop();
-actionLoop();
-actionLoop();
-actionLoop();
-actionLoop();
-actionLoop();
+Array.from(Array(7)).forEach((_, i) => {
+    console.log(i, "#####");
+    actionLoop();
+    actionVerify();
+});
 */
 
 
@@ -73,27 +77,38 @@ function actionLoop() {
             actionCommunicate();
             break;
     }
-
-
-}
-
-function reproducableActions() {
-    data.addBlock("truth", data.actors[actorIndex].name, 0);
 }
 
 function actionTruth() {
+    // A node mines the next block in the blockchain
     const actorIndex = getRandomInt(0, data.actors.length-1);
     console.log("adding truth to", data.actors[actorIndex].name);
-    data.addBlock("truth", data.actors[actorIndex].name, 0);
+    data.addBlock(
+        {
+            label: "truth",
+            creator: data.actors[actorIndex].name,
+        },
+        data.actors[actorIndex].name,
+        0
+    );
 }
 
 function actionLie() {
+    // A node adds a false block to one of their blockchains
     const actorIndex = getRandomInt(0, data.actors.length-1);
     console.log("adding lie to", data.actors[actorIndex].name);
-    data.addBlock("lie", data.actors[actorIndex].name, 0);
+    data.addBlock(
+        {
+            label: "lie",
+            creator: data.actors[actorIndex].name,
+        },
+        data.actors[actorIndex].name,
+        0
+    );
 }
 
 function actionCommunicate() {
+    // A node shares their blockchains with another node
     const fromActorIndex = getRandomInt(0, data.actors.length-1);
     const fromActorName = data.actors[fromActorIndex].name;
     let toActorIndex;
@@ -103,6 +118,12 @@ function actionCommunicate() {
     const toActorName = data.actors[toActorIndex].name;
     console.log("communicating from", data.actors[fromActorIndex].name, "to", data.actors[toActorIndex].name);
     data.communicate(fromActorName, toActorName);
+}
+
+function actionVerify() {
+    // All nodes check their blockchains for inconsistencies
+    console.log("verifying transactions");
+    data.verifyBlockchainsForAllActors();
 }
 
 function sleep(ms) {

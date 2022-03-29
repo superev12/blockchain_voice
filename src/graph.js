@@ -33,8 +33,8 @@ export default class Graph {
             x: Math.random() * 10,
             y: Math.random() * 10,
             size: 5,
-            label: content,
-            color: getColourFromBlockContent(content),
+            label: content.label,
+            color: getColourFromBlockContent(content.label),
         });
 
         this.linkBlockToParent(blockName);
@@ -68,6 +68,24 @@ export default class Graph {
         }
 
 
+    }
+
+    addCommunicationEdge(fromActorName, toActorName) {
+        return
+        this.graph.addEdge(fromActorName, toActorName, {
+            type: "arrow",
+            label: "talk",
+        })
+    }
+
+    clearCommunicationEdges() {
+        //console.log("clearing communication edges");
+        const communicationEdges = this.graph.filterEdges((edge) => edge.label === "talk");
+        //console.log("deleteting communication edge", communicationEdges)
+        if (communicationEdges?.length > 0) {
+            this.graph.dropEdge(communicationEdges[0]);
+        }
+        
     }
 
 }

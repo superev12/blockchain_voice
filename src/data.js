@@ -23,6 +23,7 @@ export default class Data {
     }
 
     addBlock(newBlock, targetActorName, targetChainIndex) {
+        this.graph.clearCommunicationEdges();
         const targetActorIndex = this.getActorIndexFromName(targetActorName);
 
         let targetBlockIndex;
@@ -58,10 +59,13 @@ export default class Data {
     }
 
     communicate(fromActorName, toActorName) {
+        this.graph.clearCommunicationEdges();
+        this.graph.addCommunicationEdge(fromActorName, toActorName);
+
         const fromActorIndex = this.getActorIndexFromName(fromActorName);
         const toActorIndex = this.getActorIndexFromName(toActorName);
+
         // Update data
-        
         const fromActorBlockchains = this.actors[fromActorIndex].currentChains;
         console.log("Blockchains to be sent", fromActorBlockchains)
         let addBlockchainOutput;
@@ -110,6 +114,45 @@ export default class Data {
             }
         }
         console.log(this.actors);
+
+    }
+
+    verifyBlockchainsForAllActors() {
+        // Update Data
+        const affectedActorsIndeces = [];
+        for (let actorIndex in this.actors) {
+            const chainsPurged = this.actors[actorIndex].verifyBlockchains();
+            const wasActorAffected = chainsPurged.size > 0;
+            if (wasActorAffected) {
+                affectedActorsIndeces.push(actorIndex);
+            }
+        }
+
+        const gullibleActorsNames = affectedActorsIndeces.map((index) => this.actors[index].name);
+        const gullibleActors = affectedActorsIndeces.map((index) => this.actors[index]);
+        if (gullibleActors.length > 0) {
+            console.log("the following actors have identified lies", gullibleActors);
+        }
+
+        // Update Graph
+        
+        console.log("affectedActors from verifcation were", affectedActorsIndeces)
+        for (let actorIndex of affectedActorsIndeces) {
+            const actorName = this.actors[actorIndex].name;
+            this.graph.removeChainsFromParent(actorName);
+
+            // add new chains
+            for (let chainIndex = 0; chainIndex < this.actors[actorIndex].currentChains.length; chainIndex++) {
+                for (let blockIndex = 0; blockIndex < this.actors[actorIndex].currentChains[chainIndex].length; blockIndex ++) {
+                    this.graph.addBlock(
+                        this.actors[actorIndex].currentChains[chainIndex][blockIndex],
+                        actorName,
+                        chainIndex,
+                        blockIndex
+                    );
+                }
+            }
+        }
 
     }
 
