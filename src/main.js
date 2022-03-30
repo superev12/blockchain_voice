@@ -2,6 +2,7 @@ import "path";
 
 import Actor from "./actor";
 import Data from "./data";
+import Sound from "./sound";
 import {getRandomInt, weightedRandom} from "./utils";
 
 const stepTimeMs = 400;
@@ -10,8 +11,11 @@ const actionWeights = {
     lie: 1,
     communicate: 10,
 }
-debugger;
 
+const digest = require("../digest.json");
+console.log("digest has", digest);
+
+const sound = new Sound();
 const testActor = new Actor("Marley");
 testActor.currentChains = [["a", "a", "b", "a"], ["a", "a", "a", "a"]];
 const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
@@ -70,6 +74,7 @@ function actionLoop() {
     const randomAction = weightedRandom(Object.keys(actionWeights), Object.values(actionWeights));
 
     console.log("performing action", randomAction)
+    sound.playSound();
 
     switch(randomAction) {
         case "truth":
