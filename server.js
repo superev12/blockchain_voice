@@ -25,6 +25,8 @@ app.get("/submit", (req, res) => {
     res.send("This is a request to /submit, nice")
 });
 
+app.use(express.static("public"));
+
 
 //const server = app.listen(process.env.port);
 const server = app.listen(8080)

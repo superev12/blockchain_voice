@@ -5,6 +5,8 @@ import Data from "./data";
 import Sound from "./sound";
 import {getRandomInt, weightedRandom} from "./utils";
 
+import * as Tone from "tone";
+
 const stepTimeMs = 400;
 const actionWeights = {
     truth: 2,
@@ -15,18 +17,23 @@ const actionWeights = {
 const digest = require("../digest.json");
 console.log("digest has", digest);
 
-const sound = new Sound();
-const testActor = new Actor("Marley");
-testActor.currentChains = [["a", "a", "b", "a"], ["a", "a", "a", "a"]];
-const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
 
-setInterval(() => {
-    actionLoop()
-    sleep(stepTimeMs).then(() => {
-        actionVerify();
-    });
+const actors = Object.values(digest).map((person) => new Actor(person.displayName));
+//const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
+const data = new Data(actors);
 
-}, stepTimeMs*2);
+const repeatActionLoop = () => {
+    console.log("we're repeating the action loop");
+    setInterval(() => {
+        actionLoop()
+        sleep(stepTimeMs).then(() => {
+            actionVerify();
+        });
+
+    }, stepTimeMs*2);
+}
+
+const sound = new Sound(digest, repeatActionLoop);
 
 /*
 Array.from(Array(7)).forEach((_, i) => {
@@ -74,7 +81,7 @@ function actionLoop() {
     const randomAction = weightedRandom(Object.keys(actionWeights), Object.values(actionWeights));
 
     console.log("performing action", randomAction)
-    sound.playSound();
+    sound.playSound("harry_truth");
 
     switch(randomAction) {
         case "truth":
