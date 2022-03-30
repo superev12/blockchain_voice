@@ -12,5 +12,19 @@
         "truthSoundFilename": "jess_true.wav",
         "lieSoundFilename": "jess_lie.wav",
         "communicateSoundFilename": "jess_communicate.wav"
+    },
+    "eunice": {
+        "displayName": "Eunice",
+        "vocalEncodingFilename": "jess.enc",
+        "truthSoundFilename": "jess_true.wav",
+        "lieSoundFilename": "jess_lie.wav",
+        "communicateSoundFilename": "jess_communicate.wav"
+    },
+    "macropede": {
+        "displayName": "Macropede",
+        "vocalEncodingFilename": "harry.enc",
+        "truthSoundFilename": "harry_true.wav",
+        "lieSoundFilename": "harry_lie.wav",
+        "communicateSoundFilename": "harry_communicate.wav"
     }
 }

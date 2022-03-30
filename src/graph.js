@@ -49,9 +49,29 @@ export default class Graph {
         for (let nodeKey of this.graph.nodes()) {
             const nodeComponents = nodeKey.split(".");
             if (nodeComponents.length > 1 && nodeComponents[0] === parentName) {
-                console.log("removing", nodeComponents);
                 this.removeBlock(...nodeComponents);
             }
+        }
+    }
+
+    addChainsToActor(actorName, chains) {
+        const startIndex = this.getActorNextFreeChainIndex();
+
+        for (let sourceChainIndex = 0; sourceChainIndex < chains.length; sourceChainIndex++) {
+            const targetChainIndex = startIndex + sourceChainIndex;
+            this.addChainToActorAtChainIndex(actorName, targetChainIndex, chains[sourceChainIndex]);
+        }
+
+    }
+
+    addChainToActorAtChainIndex(actorName, chainIndex, chain) {
+        for (let blockIndex = 0; blockIndex < chain.length; blockIndex++) {
+            this.addBlock(
+                chain[blockIndex],
+                actorName,
+                chainIndex,
+                blockIndex
+            )
         }
     }
 
@@ -70,18 +90,25 @@ export default class Graph {
 
     }
 
+    getActorNextFreeChainIndex(actorName) {
+        let i = 0;
+        while (this.graph.hasNode(getBlockNodeName(actorName, i, 0))) i++;
+        return i;
+    }
+
     addCommunicationEdge(fromActorName, toActorName) {
-        return
         this.graph.addEdge(fromActorName, toActorName, {
             type: "arrow",
             label: "talk",
+            size: 5,
+            color: "green",
         })
     }
 
     clearCommunicationEdges() {
-        //console.log("clearing communication edges");
-        const communicationEdges = this.graph.filterEdges((edge) => edge.label === "talk");
-        //console.log("deleteting communication edge", communicationEdges)
+        const communicationEdges = this.graph.filterEdges((edge) => {
+            return this.graph.getEdgeAttributes(edge).label === "talk";
+        });
         if (communicationEdges?.length > 0) {
             this.graph.dropEdge(communicationEdges[0]);
         }

@@ -5,12 +5,13 @@ import Data from "./data";
 import Sound from "./sound";
 import {getRandomInt, weightedRandom} from "./utils";
 
-const stepTimeMs = 800;
+const stepTimeMs = 2000;
 const actionWeights = {
     truth: 2,
-    lie: 1,
-    communicate: 10,
+    lie: 0.5,
+    communicate: 15,
 }
+const soundOn = true;
 
 const digest = require("../digest.json");
 console.log("digest has", digest);
@@ -19,10 +20,11 @@ console.log("digest has", digest);
 const actors = Object.keys(digest).map((id) => new Actor(digest[id].displayName, id));
 //const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
 const data = new Data(actors);
+console.log(data)
 
 const repeatActionLoop = () => {
-    console.log("we're repeating the action loop");
     setInterval(() => {
+        console.log("data is now", JSON.stringify(data.actors))
         actionLoop()
         //sleep(stepTimeMs).then(() => {
         //    actionVerify();
@@ -33,13 +35,13 @@ const repeatActionLoop = () => {
 
 const sound = new Sound(digest, repeatActionLoop);
 
-/*
-Array.from(Array(7)).forEach((_, i) => {
-    console.log(i, "#####");
-    actionLoop();
-    actionVerify();
-});
-*/
+if (false) {
+    Array.from(Array(15)).forEach((_, i) => {
+        console.log(i, "#####");
+        actionLoop();
+        console.log("data is now", JSON.stringify(data.actors))
+    });
+}
 
 
 
@@ -78,8 +80,6 @@ function registerActors(actors) {
 function actionLoop() {
     const randomAction = weightedRandom(Object.keys(actionWeights), Object.values(actionWeights));
 
-    console.log("performing action", randomAction)
-
     switch(randomAction) {
         case "truth":
             // Add truth to an actor
@@ -100,7 +100,7 @@ function actionTruth() {
     // A node mines the next block in the blockchain
     const actorIndex = getRandomInt(0, data.actors.length-1);
     console.log("adding truth to", data.actors[actorIndex].name);
-    sound.playSound(`${data.actors[actorIndex].id}_true`);
+    if (soundOn) sound.playSound(`${data.actors[actorIndex].id}_true`);
     data.addBlock(
         {
             label: "truth",
@@ -115,7 +115,7 @@ function actionLie() {
     // A node adds a false block to one of their blockchains
     const actorIndex = getRandomInt(0, data.actors.length-1);
     console.log("adding lie to", data.actors[actorIndex].name);
-    sound.playSound(`${data.actors[actorIndex].id}_lie`);
+    if (soundOn) sound.playSound(`${data.actors[actorIndex].id}_lie`);
     data.addBlock(
         {
             label: "lie",
@@ -139,7 +139,7 @@ function actionCommunicate() {
     }
     const toActorName = data.actors[toActorIndex].name;
     console.log("communicating from", data.actors[fromActorIndex].name, "to", data.actors[toActorIndex].name);
-    sound.playSound(`${data.actors[fromActorIndex].id}_communicate`);
+    if (soundOn) sound.playSound(`${data.actors[fromActorIndex].id}_communicate`);
     data.communicate(fromActorName, toActorName);
 }
 

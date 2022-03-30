@@ -27,8 +27,10 @@ export default class Data {
         const targetActorIndex = this.getActorIndexFromName(targetActorName);
 
         let targetBlockIndex;
+
         const targetChain = this.actors[targetActorIndex].currentChains[targetChainIndex] 
         const purgeExistingGraph = targetChain.length > 1;
+
         if (targetChain === undefined || targetChain.length === 0) {
             targetBlockIndex = 0
         } else {
@@ -44,14 +46,7 @@ export default class Data {
         {
             if (purgeExistingGraph) {
                 this.graph.removeChainsFromParent(targetActorName);
-                for (let blockIndex = 0; blockIndex < this.actors[targetActorIndex].currentChains[targetChainIndex].length; blockIndex ++) {
-                    this.graph.addBlock(
-                        this.actors[targetActorIndex].currentChains[targetChainIndex][blockIndex],
-                        targetActorName,
-                        targetChainIndex,
-                        blockIndex
-                    );
-                }
+                this.graph.addChainsToActor(targetActorName, this.actors[targetActorIndex].currentChains);
             } else {
                 this.graph.addBlock(newBlock, targetActorName, targetChainIndex, targetBlockIndex);
             }
@@ -67,20 +62,36 @@ export default class Data {
 
         // Update data
         const fromActorBlockchains = this.actors[fromActorIndex].currentChains;
-        const uniqueFromActorBlockchains = fromActorBlockchains.filter((chain) => {
+
+        const isNonEmpty = (chain) => chain.length !== 0;
+
+        const isUnique = (chain) => {
             return !this.actors[toActorIndex].currentChains.includes(chain);
-        });
-        console.log("Blockchains to be sent", uniqueFromActorBlockchains)
+        }
+
+        const isTruthful = (chain) => {
+            return !chain
+                .map((block) => block.label)
+                .includes("lie");
+        }
+
+        console.log("before filter", fromActorBlockchains)
+        const filteredBlockchains = fromActorBlockchains
+            .filter(isNonEmpty)
+            .filter(isUnique)
+            .filter(isTruthful);
+        console.log("after filter", filteredBlockchains)
+
         let addBlockchainOutput;
-        for (let blockchain of uniqueFromActorBlockchains) {
-            console.log("blockchain to be sent", blockchain);
+        for (let blockchain of filteredBlockchains) {
             addBlockchainOutput = this.actors[toActorIndex].addBlockchain(blockchain)
         }
 
         // Shared data
-        const numberOfSharedBlockchains = uniqueFromActorBlockchains.length;
+        const numberOfSharedBlockchains = filteredBlockchains.length;
         const operation = addBlockchainOutput;
-        console.log(numberOfSharedBlockchains)
+
+        console.log("filtered blocks for communication were", filteredBlockchains)
 
         // Update graph
         if (operation === "nothing") return;
@@ -89,37 +100,15 @@ export default class Data {
             this.graph.removeChainsFromParent(toActorName);
 
             // add new chains
-            for (let chainIndex = 0; chainIndex < numberOfSharedBlockchains; chainIndex++) {
-                for (let blockIndex = 0; blockIndex < this.actors[fromActorIndex].currentChains[chainIndex].length; blockIndex ++) {
-                console.log("adding new chains");
-                    this.graph.addBlock(
-                        this.actors[fromActorIndex].currentChains[chainIndex][blockIndex],
-                        toActorName,
-                        chainIndex,
-                        blockIndex
-                    );
-                }
-            }
+            this.graph.addChainsToActor(toActorName, filteredBlockchains)
         }
         if (operation === "appended") {
-            const startIndex = this.actors[toActorIndex].currentChains.length - numberOfSharedBlockchains;
-            // add new chains
-            for (let chainIndex = 0; chainIndex < numberOfSharedBlockchains; chainIndex++) {
-                for (let blockIndex = 0; blockIndex < this.actors[fromActorIndex].currentChains[chainIndex].length; blockIndex ++) {
-                console.log("adding new chains");
-                    this.graph.addBlock(
-                        this.actors[fromActorIndex].currentChains[chainIndex][blockIndex],
-                        toActorName,
-                        chainIndex + startIndex,
-                        blockIndex
-                    );
-                }
-            }
+            this.graph.addChainsToActor(toActorName, filteredBlockchains)
         }
-        console.log(this.actors);
 
     }
 
+    /*
     verifyBlockchainsForAllActors() {
         // Update Data
         const affectedActorsIndeces = [];
@@ -158,6 +147,7 @@ export default class Data {
         }
 
     }
+    */
 
     getActorIndexFromName(actorName) {
         for (let i = 0; i < this.actors.length; i ++) {
