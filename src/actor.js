@@ -1,8 +1,9 @@
 
 export default class Actor {
-    constructor(name) {
+    constructor(name, id) {
         this.currentChains = [[]];
         this.name = name;
+        this.id = id;
     }
 
     addBlock(index, content) {

@@ -5,9 +5,7 @@ import Data from "./data";
 import Sound from "./sound";
 import {getRandomInt, weightedRandom} from "./utils";
 
-import * as Tone from "tone";
-
-const stepTimeMs = 400;
+const stepTimeMs = 800;
 const actionWeights = {
     truth: 2,
     lie: 1,
@@ -18,7 +16,7 @@ const digest = require("../digest.json");
 console.log("digest has", digest);
 
 
-const actors = Object.values(digest).map((person) => new Actor(person.displayName));
+const actors = Object.keys(digest).map((id) => new Actor(digest[id].displayName, id));
 //const data = new Data([new Actor("Jeff"), new Actor("Harry"), new Actor("Eunice"), new Actor("Macropede")]);
 const data = new Data(actors);
 
@@ -26,11 +24,11 @@ const repeatActionLoop = () => {
     console.log("we're repeating the action loop");
     setInterval(() => {
         actionLoop()
-        sleep(stepTimeMs).then(() => {
-            actionVerify();
-        });
+        //sleep(stepTimeMs).then(() => {
+        //    actionVerify();
+        //});
 
-    }, stepTimeMs*2);
+    }, stepTimeMs);
 }
 
 const sound = new Sound(digest, repeatActionLoop);
@@ -81,7 +79,6 @@ function actionLoop() {
     const randomAction = weightedRandom(Object.keys(actionWeights), Object.values(actionWeights));
 
     console.log("performing action", randomAction)
-    sound.playSound("harry_truth");
 
     switch(randomAction) {
         case "truth":
@@ -103,6 +100,7 @@ function actionTruth() {
     // A node mines the next block in the blockchain
     const actorIndex = getRandomInt(0, data.actors.length-1);
     console.log("adding truth to", data.actors[actorIndex].name);
+    sound.playSound(`${data.actors[actorIndex].id}_true`);
     data.addBlock(
         {
             label: "truth",
@@ -117,6 +115,7 @@ function actionLie() {
     // A node adds a false block to one of their blockchains
     const actorIndex = getRandomInt(0, data.actors.length-1);
     console.log("adding lie to", data.actors[actorIndex].name);
+    sound.playSound(`${data.actors[actorIndex].id}_lie`);
     data.addBlock(
         {
             label: "lie",
@@ -132,11 +131,15 @@ function actionCommunicate() {
     const fromActorIndex = getRandomInt(0, data.actors.length-1);
     const fromActorName = data.actors[fromActorIndex].name;
     let toActorIndex;
+    let tries = 0;
     while (toActorIndex === fromActorIndex || !toActorIndex) {
         toActorIndex = getRandomInt(0, data.actors.length-1);
+        tries++;
+        if (tries > 32) return;
     }
     const toActorName = data.actors[toActorIndex].name;
     console.log("communicating from", data.actors[fromActorIndex].name, "to", data.actors[toActorIndex].name);
+    sound.playSound(`${data.actors[fromActorIndex].id}_communicate`);
     data.communicate(fromActorName, toActorName);
 }
 

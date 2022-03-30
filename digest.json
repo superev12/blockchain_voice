@@ -2,35 +2,14 @@
     "harry": {
         "displayName": "Harry",
         "vocalEncodingFilename": "harry.enc",
-        "truthSoundFilename": "harry_truth.wav",
+        "truthSoundFilename": "harry_true.wav",
         "lieSoundFilename": "harry_lie.wav",
         "communicateSoundFilename": "harry_communicate.wav"
-    },
-    "jeff": {
-        "displayName": "Jeff",
-        "vocalEncodingFilename": "jeff.enc",
-        "truthSoundFilename": "jeff_truth.wav",
-        "lieSoundFilename": "jeff_lie.wav",
-        "communicateSoundFilename": "jeff_communicate.wav"
-    },
-    "eunice": {
-        "displayName": "Eunice",
-        "vocalEncodingFilename": "eunice.enc",
-        "truthSoundFilename": "eunice_truth.wav",
-        "lieSoundFilename": "eunice_lie.wav",
-        "communicateSoundFilename": "eunice_communicate.wav"
-    },
-    "macropede": {
-        "displayName": "Macropede",
-        "vocalEncodingFilename": "macropede.enc",
-        "truthSoundFilename": "macropede_truth.wav",
-        "lieSoundFilename": "macropede_lie.wav",
-        "communicateSoundFilename": "macropede_communicate.wav"
     },
     "jess": {
         "displayName": "Jess",
         "vocalEncodingFilename": "jess.enc",
-        "truthSoundFilename": "jess_truth.wav",
+        "truthSoundFilename": "jess_true.wav",
         "lieSoundFilename": "jess_lie.wav",
         "communicateSoundFilename": "jess_communicate.wav"
     }
