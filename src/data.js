@@ -70,7 +70,22 @@ export default class Data {
         const isNonEmpty = (chain) => chain.length !== 0;
 
         const isUnique = (chain) => {
-            return !this.actors[toActorIndex].currentChains.includes(chain);
+            //return !this.actors[toActorIndex].currentChains.includes(chain);
+            for (const existingChain of this.actors[toActorIndex].currentChains) {
+                let chainIsSame = true
+                // Check chain is not equal to existing chain
+                if (existingChain.length !== chain.length) {
+                    chainIsSame = false
+                }
+                for (let i = 0; i < chain.length; i++) {
+                    if (chain[i] !== existingChain[i]) {
+                        chainIsSame = false;
+                    }
+                }
+
+                if (chainIsSame) return false
+            }
+            return true;
         }
 
         const isTruthful = (chain) => {
