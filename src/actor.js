@@ -9,22 +9,29 @@ export default class Actor {
     addBlock(index, content) {
         if (index < 0 || index >= this.currentChains.length) return;
 
-        this.currentChains[index].push(content);
+        console.log("current chains before adding block", JSON.stringify(this.currentChains));
+        console.log("block to be added to chain at chainIndex", index)
+
+        this.currentChains[index] = this.currentChains[index].concat([content])
+        //this.currentChains[index].push(content);
+
+        console.log("current chains after adding block", JSON.stringify(this.currentChains));
 
         return true;
     }
 
     addBlockchain(chain) {
+        const chainCopy = new Array(...chain);
         if (chain.length < this.currentChains[0]?.length) {
             return "nothing";
         }
 
         if (chain.length === this.currentChains[0]?.length) {
-            this.currentChains = this.currentChains.concat([chain]);
+            this.currentChains = this.currentChains.concat([chainCopy]);
             return "appended";
         }
 
-        this.currentChains = [chain];
+        this.currentChains = [chainCopy];
         return "replaced";
     }
 

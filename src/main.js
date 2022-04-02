@@ -36,7 +36,7 @@ const repeatActionLoop = () => {
 const sound = new Sound(digest, repeatActionLoop);
 
 if (false) {
-    Array.from(Array(15)).forEach((_, i) => {
+    Array.from(Array(12)).forEach((_, i) => {
         console.log(i, "#####");
         actionLoop();
         console.log("data is now", JSON.stringify(data.actors))

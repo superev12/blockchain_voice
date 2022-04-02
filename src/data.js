@@ -31,11 +31,15 @@ export default class Data {
         const targetChain = this.actors[targetActorIndex].currentChains[targetChainIndex] 
         const purgeExistingGraph = targetChain.length > 1;
 
+        console.log("the target chain is", targetChain);
+
         if (targetChain === undefined || targetChain.length === 0) {
             targetBlockIndex = 0
         } else {
             targetBlockIndex = targetChain.length;
         }
+
+        console.log("The target block index is", targetBlockIndex)
 
         // Update data
         {
