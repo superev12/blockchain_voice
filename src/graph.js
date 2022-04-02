@@ -55,7 +55,8 @@ export default class Graph {
     }
 
     addChainsToActor(actorName, chains) {
-        const startIndex = this.getActorNextFreeChainIndex();
+        const startIndex = this.getActorNextFreeChainIndex(actorName);
+        console.log("the chain index to add at is", startIndex)
 
         for (let sourceChainIndex = 0; sourceChainIndex < chains.length; sourceChainIndex++) {
             const targetChainIndex = startIndex + sourceChainIndex;
@@ -92,7 +93,11 @@ export default class Graph {
 
     getActorNextFreeChainIndex(actorName) {
         let i = 0;
-        while (this.graph.hasNode(getBlockNodeName(actorName, i, 0))) i++;
+        console.log("check actor named", getBlockNodeName(actorName, i, 0))
+        console.log("from name", actorName)
+        while (this.graph.hasNode(getBlockNodeName(actorName, i, 0))) {
+            i++;
+        };
         return i;
     }
 

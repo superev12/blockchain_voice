@@ -100,6 +100,7 @@ export default class Data {
         // Update graph
         if (operation === "nothing") return;
         if (operation === "replaced") {
+            console.log("attempt to replace communicated blocks")
             // remove existing nodes
             this.graph.removeChainsFromParent(toActorName);
 
@@ -107,6 +108,7 @@ export default class Data {
             this.graph.addChainsToActor(toActorName, filteredBlockchains)
         }
         if (operation === "appended") {
+            console.log("attempt to append communicated blocks")
             this.graph.addChainsToActor(toActorName, filteredBlockchains)
         }
 

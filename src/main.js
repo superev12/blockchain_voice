@@ -11,7 +11,7 @@ const actionWeights = {
     lie: 0.5,
     communicate: 15,
 }
-const soundOn = true;
+const soundOn = false;
 
 const digest = require("../digest.json");
 console.log("digest has", digest);
@@ -36,7 +36,7 @@ const repeatActionLoop = () => {
 const sound = new Sound(digest, repeatActionLoop);
 
 if (false) {
-    Array.from(Array(12)).forEach((_, i) => {
+    Array.from(Array(32)).forEach((_, i) => {
         console.log(i, "#####");
         actionLoop();
         console.log("data is now", JSON.stringify(data.actors))
