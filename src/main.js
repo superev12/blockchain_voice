@@ -11,7 +11,7 @@ const actionWeights = {
     lie: 0.5,
     communicate: 15,
 }
-const soundOn = false;
+const soundOn = true;
 
 const digest = require("../digest.json");
 console.log("digest has", digest);
