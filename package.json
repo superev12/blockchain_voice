@@ -4,7 +4,7 @@
   "description": "Giving blockchain a voice",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server.js"
   },
   "author": "",
@@ -15,6 +15,7 @@
     "@babel/preset-typescript": "^7.16.7",
     "babel-loader": "^8.2.4",
     "html-webpack-plugin": "^5.5.0",
+    "jest": "^28.1.0",
     "ts-loader": "^9.3.0",
     "typescript": "^4.6.4",
     "webpack": "^5.70.0",
