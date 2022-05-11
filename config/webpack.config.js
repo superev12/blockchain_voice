@@ -4,13 +4,10 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = [
     {
         mode: "development",
-        entry: {
-            main: path.resolve(__dirname, "../src/view/view.ts"),
-        },
+        entry: "./src/view/view.ts",
         output: {
-            path: path.resolve(__dirname, "../dist"),
-            filename: "view.bundle.js",
-            clean: true,
+            filename: "./dist/view.bundle.js",
+            publicPath: "/",
         },
         module: {
             rules: [
@@ -29,8 +26,8 @@ module.exports = [
         plugins: [
             new HtmlWebpackPlugin({
                 title: "View",
-                filename: "index.html",
-                template: path.resolve(__dirname, "../src/index.html"),
+                template: "./src/view/view.html",
+                filename: "./dist/view.bundle.html",
             }),
         ],
         resolve: {
@@ -44,13 +41,10 @@ module.exports = [
     },
     {
         mode: "development",
-        entry: {
-            main: path.resolve(__dirname, "../src/submit/submit.ts"),
-        },
+        entry: "./src/submit/submit.ts",
         output: {
-            path: path.resolve(__dirname, "../dist"),
-            filename: "submit.bundle.js",
-            clean: true,
+            filename: "./dist/submit.bundle.js",
+            publicPath: "/",
         },
         module: {
             rules: [
@@ -69,8 +63,8 @@ module.exports = [
         plugins: [
             new HtmlWebpackPlugin({
                 title: "Submit",
-                filename: "submit.html",
-                template: path.resolve(__dirname, "../src/submit.html"),
+                template: "./src/submit/submit.html",
+                filename: "./dist/submit.bundle.html",
             }),
         ],
         resolve: {
