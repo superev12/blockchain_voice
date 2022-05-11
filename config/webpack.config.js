@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = [
     {
         mode: "development",
+        experiments: {topLevelAwait: true},
         entry: "./src/view/view.ts",
         output: {
             filename: "./dist/view.bundle.js",
@@ -41,6 +42,7 @@ module.exports = [
     },
     {
         mode: "development",
+        experiments: {topLevelAwait: true},
         entry: "./src/submit/submit.ts",
         output: {
             filename: "./dist/submit.bundle.js",
