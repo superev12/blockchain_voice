@@ -10,7 +10,14 @@ console.log("Hello from the view script!");
 const digest = await Networking.fetchDigest();
 
 // Initialise graph
-const actorIds : Array<String> = Object.keys(digest);
-const graph = new Graph(actorIds);
+const actors = Object.keys(digest).map((id) => {
+    return {
+        id: id,
+        displayName: digest[id].displayName,
+    };
+});
+console.log(actors);
+
+const graph = new Graph(actors);
 
 // Initialise sound

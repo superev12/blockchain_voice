@@ -2,17 +2,20 @@ import * as Graphology from "graphology";
 import ForceSupervisor from "graphology-layout-force/worker";
 import Sigma from "sigma";
 import {List, Set} from "immutable";
+import {v4 as uuid} from "uuid";
+
+import {NodeUUID, BlockUUID} from "./utils.ts";
+
+enum NodeType {Actor, Block}
 
 export class Graph {
     
-    graph: Graphology.Graph;
-    renderer: Sigma;
-    layout: ForceSupervisor;
+    private graph: Graphology.Graph;
+    private renderer: Sigma;
+    private layout: ForceSupervisor;
 
-
-    constructor(actorIds) {
+    constructor(actors) {
         console.log("initialised the graph");
-        console.log(actorIds);
 
         this.graph = new Graphology.Graph();
 
@@ -21,6 +24,31 @@ export class Graph {
         this.renderer = new Sigma(this.graph, container, {});
         this.layout = new ForceSupervisor(this.graph);
         this.layout.start();
+
+        // add actors to graph
+        actors.forEach((actor) => {
+            this.addActor(actor.id, actor.displayName);
+        });
+    }
+
+    // Top level instructions
+    addLie(){}
+    addTruth() {}
+    communicate() {}
+
+    // Private instructions
+
+    private addActor(actorId, displayName) {
+        this.graph.addNode(actorId, {
+            x: Math.random() * 10,
+            y: Math.random() * 10,
+            size: 10,
+            label: displayName,
+            color: "grey",
+            // custom attributes
+            isActor: NodeType.Actor,
+            nodeUUID: uuid(),
+        });
     }
 
 }
