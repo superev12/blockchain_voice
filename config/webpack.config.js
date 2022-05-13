@@ -7,7 +7,8 @@ module.exports = [
         experiments: {topLevelAwait: true},
         entry: "./src/view/view.ts",
         output: {
-            filename: "./dist/view.bundle.js",
+            filename: "./view.bundle.js",
+            clean: true,
             publicPath: "/",
         },
         module: {
@@ -28,7 +29,7 @@ module.exports = [
             new HtmlWebpackPlugin({
                 title: "View",
                 template: "./src/view/view.html",
-                filename: "./dist/view.bundle.html",
+                filename: "./view.html",
             }),
         ],
         resolve: {
@@ -45,7 +46,8 @@ module.exports = [
         experiments: {topLevelAwait: true},
         entry: "./src/submit/submit.ts",
         output: {
-            filename: "./dist/submit.bundle.js",
+            filename: "./submit.bundle.js",
+            clean: true,
             publicPath: "/",
         },
         module: {
@@ -66,7 +68,7 @@ module.exports = [
             new HtmlWebpackPlugin({
                 title: "Submit",
                 template: "./src/submit/submit.html",
-                filename: "./dist/submit.bundle.html",
+                filename: "./submit.html",
             }),
         ],
         resolve: {
