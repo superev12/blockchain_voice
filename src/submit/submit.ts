@@ -1,4 +1,3 @@
-console.log("Hello from the submission script");
 import * as Tone from "tone";
 
 // Setup recording
@@ -59,9 +58,8 @@ submitButton.onclick = async () => {
         "displayName": displayName,
         "sourceAudio": blobText,
     })
-    const http = new XMLHttpRequest();
-    // URL IS HARDCODED FOR DEV ENVIRONMENT
 
+    // URL IS HARDCODED FOR DEV ENVIRONMENT
     await fetch("/registeractor", {
         method: "POST",
         headers: {

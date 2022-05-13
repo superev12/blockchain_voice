@@ -1,6 +1,9 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
+const fs = require("fs");
+const uuid = require("uuid");
+const buffer = require("buffer");
 
 const app = express();
 
@@ -43,7 +46,8 @@ app.use(bodyParser.json());
 
 app.post("/registeractor", (req, res) => {
     console.log("Server recieved data at /registeractor");
-    console.log(req.body);
+    //console.log(req.body);
+    addNewActor(req.body.displayName, req.body.sourceAudio);
 });
 
 app.get("/manifest", (req, res) => {
@@ -59,3 +63,21 @@ const portNumber = server.address().port;
 
 console.log("Server listening on", portNumber);
 
+function addNewActor(displayName, sourceAudioString) {
+    // Save audio source
+    const audioSourceBlob = new buffer.Blob([sourceAudioString]);
+    audioSourceUUID = uuid.v4();
+    const audioSourceFilePath = path.join(
+        __dirname,
+        "public/sounds/",
+        `${audioSourceUUID}_source.wav`
+    );
+
+    audioSourceBlob.arrayBuffer().then((arrayBuffer) => {
+        fs.writeFile(audioSourceFilePath, Buffer.from(arrayBuffer), (error) => {});
+    
+    // Generate encoding
+    // Generate target audio
+    // Update digest
+    });
+}
