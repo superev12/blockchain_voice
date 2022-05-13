@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -32,6 +33,17 @@ app.get("/view", (req, res) => {
 app.get("/submit", (req, res) => {
     res.sendFile(path.join(__dirname, "dist/submit.html"));
     //res.send("This is a request to /submit, nice")
+});
+
+// Process application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({extended: true}))
+
+// Process application/json
+app.use(bodyParser.json());
+
+app.post("/registeractor", (req, res) => {
+    console.log("Server recieved data at /registeractor");
+    console.log(req.body);
 });
 
 app.get("/manifest", (req, res) => {
