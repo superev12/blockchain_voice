@@ -4,15 +4,17 @@ import Sigma from "sigma";
 import {List, Set} from "immutable";
 import {v4 as uuid} from "uuid";
 
-import {NodeUUID, BlockUUID} from "./utils.ts";
+import {NodeUUID, BlockUUID} from "./utils";
 
-enum NodeType {Actor, Block}
+const enum NodeType {Actor, Block}
 
 export class Graph {
     
     private graph: Graphology.Graph;
     private renderer: Sigma;
     private layout: ForceSupervisor;
+
+    public blockTruths: Array<boolean> = [];
 
     constructor(actors) {
         console.log("initialised the graph");
@@ -32,9 +34,38 @@ export class Graph {
     }
 
     // Top level instructions
-    addLie(){}
-    addTruth() {}
+    addLie(actorId: number) {
+        // Generate new lie block
+        // Add to actor
+    }
+
+    addTruth(actorId: number, chainIndex) {
+        // Generate 
+    }
     communicate() {}
+
+    // Access instructions
+    getActorIds(): Array<string> {
+        return this.graph
+            .filterNodes((_, attributes) => {
+                return attributes.nodeType == NodeType.Actor
+            });
+    }
+
+    getNumberOfActors(): number {
+        return this.graph.filterNodes((_, attributes) => {
+            return attributes.nodeType == NodeType.Actor
+        }).length;
+    }
+
+    getNumberOfChains(actorId: number): number {
+        return 0;
+    }
+
+    getChain(actorId: number, chainIndex: number): Array<BlockUUID> {
+        return <BlockUUID[]>[];
+    }
+
 
     // Private instructions
 
@@ -46,7 +77,7 @@ export class Graph {
             label: displayName,
             color: "grey",
             // custom attributes
-            isActor: NodeType.Actor,
+            nodeType: NodeType.Actor,
             nodeUUID: uuid(),
         });
     }

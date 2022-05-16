@@ -33,6 +33,7 @@ module.exports = [
             }),
         ],
         resolve: {
+            extensions: ['', '.js', '.ts'],
             fallback: {
                 path: require.resolve("path-browserify"),
                 crypto: require.resolve("crypto-browserify"),
