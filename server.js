@@ -3,7 +3,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const uuid = require("uuid");
-const buffer = require("buffer");
+const exec = require("child_process").exec;
 
 const app = express();
 
@@ -72,16 +72,14 @@ function addNewActor(displayName, sourceAudioString) {
         `${sourceAudioUUID}_source.ogx`
     );
     const sourceAudioBuffer = Buffer.from(sourceAudioString);
-    //const file = new File([audioSourceBlob], audioSourceFilePath, {lastModified: new Data()});
     fs.writeFileSync(sourceAudioFilePath, sourceAudioBuffer, "binary");
 
-    /*
-    audioSourceBlob.arrayBuffer().then((arrayBuffer) => {
-        fs.writeFile(audioSourceFilePath, Buffer.from(arrayBuffer), (error) => {});
-    
-    // Generate encoding
-    // Generate target audio
-    // Update digest
+    // Generate encoding and audio
+
+    const script = exec(`sh scripts/do_machine_learning.sh ${sourceAudioUUID}`);
+    script.stdout.on("data", (data) => {
+        console.log(data);
     });
-    */
+
+
 }
