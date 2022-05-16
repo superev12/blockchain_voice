@@ -65,6 +65,7 @@ console.log("Server listening on", portNumber);
 
 function addNewActor(displayName, sourceAudioString) {
     // Save audio source
+
     sourceAudioUUID = uuid.v4();
     const sourceAudioFilePath = path.join(
         __dirname,
@@ -81,5 +82,25 @@ function addNewActor(displayName, sourceAudioString) {
         console.log(data);
     });
 
+    // Write new entry to json
 
+    script.on("exit", () => {
+        const digestFilePath = path.join(__dirname, "public/digest.json");
+        fs.readFile(digestFilePath, "utf8", (err, jsonString) => {
+            if (err) return;
+
+            const digest = JSON.parse(jsonString);
+            digest[sourceAudioUUID] = {
+                "displayName": displayName,
+                "vocalEncodingFilename": `${sourceAudioUUID}.enc`,
+                "truthSoundFilename": `${sourceAudioUUID}_true.wav`,
+                "lieSoundFilename": `${sourceAudioUUID}_lie.wav`,
+                "communicateSoundFilename": `${sourceAudioUUID}_communicate.wav`
+            }
+
+            console.log("writing", digest[sourceAudioUUID]);
+
+            fs.writeFileSync(digestFilePath, JSON.stringify(digest, null, 2));
+        })
+    });
 }
