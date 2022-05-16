@@ -53,9 +53,13 @@ function doTruth() {
     // Pick actor to add truth to
     const actorIndex = getRandomInt(0, graph.getNumberOfActors());
     const actorId = graph.getActorIds()[actorIndex];
-    const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorIndex));
+    const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorId));
 
     console.log(`picked ${actorIndex}, ${actorId}, ${chainIndex}`);
+
+    graph.addTruth(actorId, chainIndex);
+
+
 
     // create truth
 }
