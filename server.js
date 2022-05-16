@@ -50,11 +50,8 @@ app.post("/registeractor", (req, res) => {
     addNewActor(req.body.displayName, req.body.sourceAudio);
 });
 
-app.get("/manifest", (req, res) => {
-    res.send()
-})
-
 app.use(express.static("public"));
+app.use(express.static("dist"));
 
 
 //const server = app.listen(process.env.port);
