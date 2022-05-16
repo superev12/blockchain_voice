@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+//import * as Math from "math";
 
 // Setup recording
 const meter = new Tone.Meter();
@@ -12,10 +13,15 @@ microphone.open().then(() => {
 
 const recorder = new Tone.Recorder();
 
+// Create level meter
+const meterComponent = document.createElement("div");
+const mainComponent = document.getElementById("cats");
+mainComponent.appendChild(meterComponent);
+setTimeout(updateMeter, 100);
+
 function getTextValue(): string {
     return document.getElementById("name_input").value;
 }
-
 
 // Record Button
 let isRecording = false;
@@ -32,6 +38,11 @@ recordButton.onclick = async () => {
     setTimeout(async () => {
         recording = await recorder.stop();
         console.log("done recording");
+        const url = URL.createObjectURL(recording);
+        const anchor = document.createElement("a");
+        anchor.download = "recording.webm";
+        anchor.href = url;
+        anchor.click();
     }, 5000);
 };
 
@@ -51,7 +62,11 @@ submitButton.onclick = async () => {
     };
     console.log(displayName);
 
-    const blobText: string = await recording.text();
+    const blobText = Array.from(
+        new Uint8Array(
+            await recording.arrayBuffer()
+        )
+    );
 
     // Post data to API
     const data = JSON.stringify({
@@ -71,3 +86,16 @@ submitButton.onclick = async () => {
     console.log("Client sent data to /registeractor")
 };
 
+function updateMeter() {
+    meterComponent.innerHTML = gainToText(meter.getValue());
+    //console.log(gainToText(meter.getValue()));
+    setTimeout(updateMeter, 100);
+}
+
+function gainToText(gain: number): string {
+    if (gain <= -50) {return ""}
+
+    const numberOfThings = Math.floor((50 - Math.abs(gain))/10);
+    console.log("EE", numberOfThings);
+    return numberOfThings >= 1 ? "x".repeat(numberOfThings) : "";
+}

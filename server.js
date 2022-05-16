@@ -65,14 +65,17 @@ console.log("Server listening on", portNumber);
 
 function addNewActor(displayName, sourceAudioString) {
     // Save audio source
-    const audioSourceBlob = new buffer.Blob([sourceAudioString]);
-    audioSourceUUID = uuid.v4();
-    const audioSourceFilePath = path.join(
+    sourceAudioUUID = uuid.v4();
+    const sourceAudioFilePath = path.join(
         __dirname,
         "public/sounds/",
-        `${audioSourceUUID}_source.wav`
+        `${sourceAudioUUID}_source.ogx`
     );
+    const sourceAudioBuffer = Buffer.from(sourceAudioString);
+    //const file = new File([audioSourceBlob], audioSourceFilePath, {lastModified: new Data()});
+    fs.writeFileSync(sourceAudioFilePath, sourceAudioBuffer, "binary");
 
+    /*
     audioSourceBlob.arrayBuffer().then((arrayBuffer) => {
         fs.writeFile(audioSourceFilePath, Buffer.from(arrayBuffer), (error) => {});
     
@@ -80,4 +83,5 @@ function addNewActor(displayName, sourceAudioString) {
     // Generate target audio
     // Update digest
     });
+    */
 }
