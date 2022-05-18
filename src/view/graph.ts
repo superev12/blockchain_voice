@@ -4,9 +4,14 @@ import Sigma from "sigma";
 import {List, Set, Map} from "immutable";
 import {v4 as uuid} from "uuid";
 
-import {NodeUUID, BlockUUID} from "./utils";
+import {NodeUUID, BlockUUID, ActorID} from "./utils";
 
 const enum NodeType {Actor, Block}
+
+type BlockTruth = {
+    isTrue: boolean,
+    creator: ActorID,
+}
 
 export class Graph {
     
@@ -14,11 +19,9 @@ export class Graph {
     private renderer: Sigma;
     private layout: ForceSupervisor;
 
-    public blockTruths: Map<BlockUUID, boolean>;
+    public blockTruths: Map<BlockUUID, BlockTruth>;
 
     constructor(actors) {
-        console.log("initialised the graph");
-
         this.graph = new Graphology.Graph();
 
         const container = document.getElementById("graphDiv");
@@ -36,33 +39,57 @@ export class Graph {
     }
 
     // Top level instructions
-    addLie(actorId: number) {
-        // Generate new lie block
-        const lieUUID = uuid();
-        this.blockTruths = this.blockTruths.set(lieUUID, false);
 
-        // Add to actor
-        //this.graph.
+    addLie(actorId: ActorID, chainIndex: number) {
+        this.forceAddLie(actorId, chainIndex);
+
+        let chains = this.getChains(actorId);
+
+        console.log("chains before", chains.toString());
+
+        // Delete all but longest 
+        const maxChainLength = chains
+            .map((chain) => chain.size)
+            .reduce((r: number, item: number) => Math.max(r, item));
+        const shortChains = chains
+            .filter((chain) => chain.size < maxChainLength);
+        shortChains.forEach((chain) => 
+            chain.forEach((id: NodeUUID) => {
+                this.graph.dropNode(id);
+            }
+        ))
+
+        chains = this.getChains(actorId);
+        console.log("chains after size discrimination", chains.toString());
+
+        // Delete all foreign lies
+        const chainsWithForeignLies = chains.filter((chain) => 
+            chain.reduce((r: boolean, id: NodeUUID) => {
+                const creator = this.blockTruths.get(
+                    this.getBlockUUID(id)).creator;
+                return r || creator !== actorId;
+            }, false)
+        );
+        console.log("chains with foreign lies", chainsWithForeignLies.toString());
+        chainsWithForeignLies.forEach((chain) => 
+            chain.forEach((id: NodeUUID) => {
+                this.graph.dropNode(id);
+            }
+        ))
+        chains = this.getChains(actorId);
+        console.log("chains after nationality discrimination", chains.toString());
 
     }
 
-    addTruth(actorId: number, chainIndex: number) {
-        if (chainIndex < this.getNumberOfChains(actorId) - 1) return;
-
-        // Generate new truth block
-        const truthUUID = uuid();
-        this.blockTruths = this.blockTruths.set(truthUUID, true);
-
-
-        // Connect the block to the chain
-        this.addBlockToActorAtChain(actorId, chainIndex, truthUUID);
-
-
+    addTruth(actorId: ActorID, chainIndex: number) {
+        this.forceAddTruth(actorId, chainIndex);
     }
+
+
     communicate() {}
 
     // Access instructions
-    getActorIds(): List<string> {
+    getActorIds(): List<ActorID> {
         return this.graph
             .filterNodes((_, attributes) => {
                 return attributes.nodeType === NodeType.Actor
@@ -76,7 +103,7 @@ export class Graph {
         }).length;
     }
 
-    getNumberOfChains(actorId: number): number {
+    getNumberOfChains(actorId: ActorID): number {
         // Is the number of blocks connected to it
         return this.graph
             .filterNeighbors(actorId, (_, attributes) => {
@@ -85,7 +112,11 @@ export class Graph {
             .length;
     }
 
-    getChains(actorId: number): List<List<NodeUUID>> {
+    getBlockUUID(nodeId: NodeUUID): BlockUUID {
+        return this.graph.getNodeAttribute(nodeId, "blockUUID");
+    }
+
+    getChains(actorId: ActorID): List<List<NodeUUID>> {
         // Add every block connected to the actor
         const rootBlockNodeIds = List(this.graph
             .filterNeighbors(actorId, (_, attributes) => {
@@ -106,7 +137,6 @@ export class Graph {
             
             if (nextChain.size === 0) return chain;
             
-            console.log("about to return the recursive case");
             return addChainTail(chain.push(nextChain.get(0)));
         };
 
@@ -116,11 +146,9 @@ export class Graph {
             return addChainTail(List([id]));
         });
 
-        console.log("the chains got were", nodeIds.toString());
-
         const blockIds: List<List<BlockUUID>> = nodeIds.map((chain: List<NodeUUID>) => {
             return chain.map((nodeId: NodeUUID) => {
-                return this.graph.getNodeAttribute(nodeId, "blockUUID");
+                return this.getBlockUUID(nodeId);
             });
         });
 
@@ -133,10 +161,10 @@ export class Graph {
 
         const sortedNodeIdsAndBlockId: List<List<[NodeUUID, BlockUUID]>> = nodeIdsAndBlockIds.sort((chainA, chainB) => {
             const getBlockIdString = (chain) => {
-                return chain.reduce((reduction, value) => `${reduction}${value}`)
+                return chain.reduce((r, v): string => r + v, "");
             };
-            const chainAString = getBlockIdString(chainA);
-            const chainBString = getBlockIdString(chainB);
+            const chainAString: string = getBlockIdString(chainA);
+            const chainBString: string = getBlockIdString(chainB);
 
             return chainAString.localeCompare(chainBString);
         })
@@ -151,7 +179,7 @@ export class Graph {
 
     }
 
-    getChain(actorId: number, chainIndex: number): List<BlockUUID> {
+    getChain(actorId: ActorID, chainIndex: number): List<NodeUUID> {
         const chains = this.getChains(actorId)
         if (chainIndex >= chains.size) return List();
         return chains.get(chainIndex);
@@ -162,7 +190,7 @@ export class Graph {
 
     // Private instructions
 
-    private addActor(actorId, displayName) {
+    private addActor(actorId: ActorID, displayName: string) {
         this.graph.addNode(actorId, {
             x: Math.random() * 10,
             y: Math.random() * 10,
@@ -180,7 +208,7 @@ export class Graph {
         if (this.blockTruths.get(blockUUID) === undefined) return;
 
         const nodeUUID: NodeUUID = uuid();
-        const isTrue: boolean = this.blockTruths.get(blockUUID);
+        const isTrue: boolean = this.blockTruths.get(blockUUID).isTrue;
         this.graph.addNode(nodeUUID, {
             x: Math.random() * 10,
             y: Math.random() * 10,
@@ -196,22 +224,45 @@ export class Graph {
         return nodeUUID;
     }
 
-    private addBlockToActorAtChain(actorId: number, chainIndex: number, blockUUID: BlockUUID) {
-        console.log("##")
+    private addBlockToActorAtChain(actorId: ActorID, chainIndex: number, blockUUID: BlockUUID) {
 
-        console.log("adding new block to actor", actorId, "on chain", chainIndex);
         // Add new block
         const nodeUUID = this.addBlock(blockUUID);
-        console.log("id of the new node is", nodeUUID)
 
         // Link block to parent
         const existingChain = this.getChain(actorId, chainIndex);
-        console.log("chain is", existingChain.toString());
         const parentUUID = existingChain.size === 0 ? actorId : existingChain.get(-1);
-        console.log("parent is", parentUUID);
 
         this.graph.addEdge(nodeUUID as string, parentUUID as string);
 
+    }
+
+    forceAddLie(actorId: ActorID, chainIndex: number) {
+        console.log(`Adding lie to actor ${actorId}, chain ${chainIndex}`)
+        // Ignore references to nonexistant chains
+        if (chainIndex > this.getNumberOfChains(actorId)) return;
+
+        // Generate new lie block
+        const lieUUID = uuid();
+        this.blockTruths = this.blockTruths.set(lieUUID, {isTrue: false, creator: actorId});
+
+        // Connect the block to the chain
+        this.addBlockToActorAtChain(actorId, chainIndex, lieUUID);
+    }
+
+    forceAddTruth(actorId: ActorID, chainIndex: number) {
+        console.log(`Adding truth to actor ${actorId}, chain ${chainIndex}`)
+        // Ignore references to nonexistant chains
+        console.log("Chain index:", chainIndex);
+        console.log("number of chains:", this.getNumberOfChains(actorId));
+        if (chainIndex > this.getNumberOfChains(actorId)) return;
+
+        // Generate new truth block
+        const truthUUID = uuid();
+        this.blockTruths = this.blockTruths.set(truthUUID, {isTrue: true, creator: actorId});
+
+        // Connect the block to the chain
+        this.addBlockToActorAtChain(actorId, chainIndex, truthUUID);
     }
 
 }

@@ -2,6 +2,7 @@ import * as Random from "random-js";
 
 export type NodeUUID = string;
 export type BlockUUID = string;
+export type ActorID = string;
 
 // Setup random
 const randomEngine = Random.MersenneTwister19937.seed(42);

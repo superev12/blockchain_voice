@@ -50,11 +50,12 @@ const actionLoop = () => {
 // setInterval(actionLoop, 5000);
 // DEBUG
 const actorId = graph.getActorIds()[0];
-graph.addTruth(actorId, 0);
-graph.addTruth(actorId, 0);
-graph.addTruth(actorId, 0);
+graph.addLie(actorId, 0);
 graph.addTruth(actorId, 1);
 graph.addTruth(actorId, 0);
+//graph.addTruth(actorId, 1);
+//graph.addLie(actorId, 0);
+//graph.addLie(actorId, 2);
 
 
 function doTruth() {
@@ -63,8 +64,15 @@ function doTruth() {
     const actorId = graph.getActorIds()[actorIndex];
     const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorId) -1);
 
-    console.log(`picked ${actorIndex}, ${actorId}, ${chainIndex}`);
     graph.addTruth(actorId, chainIndex);
-
-
 }
+
+function doLie() {
+    // Pick actor to add lie to
+    const actorIndex = getRandomInt(0, graph.getNumberOfActors());
+    const actorId = graph.getActorIds()[actorIndex];
+    const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorId) -1);
+
+    graph.addLie(actorId, chainIndex);
+}
+
