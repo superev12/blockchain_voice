@@ -46,13 +46,16 @@ export class Graph {
 
     }
 
-    addTruth(actorId: number, chainIndex) {
+    addTruth(actorId: number, chainIndex: number) {
+        if (chainIndex < this.getNumberOfChains(actorId) - 1) return;
+
         // Generate new truth block
         const truthUUID = uuid();
         this.blockTruths = this.blockTruths.set(truthUUID, true);
 
-        // Add new block
-        this.addBlock(truthUUID);
+
+        // Connect the block to the chain
+        this.addBlockToActorAtChain(actorId, chainIndex, truthUUID);
 
 
     }
@@ -62,13 +65,14 @@ export class Graph {
     getActorIds(): List<string> {
         return this.graph
             .filterNodes((_, attributes) => {
-                return attributes.nodeType == NodeType.Actor
-            });
+                return attributes.nodeType === NodeType.Actor
+            }
+        );
     }
 
     getNumberOfActors(): number {
         return this.graph.filterNodes((_, attributes) => {
-            return attributes.nodeType == NodeType.Actor
+            return attributes.nodeType === NodeType.Actor
         }).length;
     }
 
@@ -76,13 +80,81 @@ export class Graph {
         // Is the number of blocks connected to it
         return this.graph
             .filterNeighbors(actorId, (_, attributes) => {
-                return attributes.nodeType == NodeType.Block;
+                return attributes.nodeType === NodeType.Block;
             })
             .length;
     }
 
+    getChains(actorId: number): List<List<NodeUUID>> {
+        // Add every block connected to the actor
+        const rootBlockNodeIds = List(this.graph
+            .filterNeighbors(actorId, (_, attributes) => {
+                return attributes.nodeType == NodeType.Block;
+            })
+        );
+
+        const addChainTail = (chain: List<NodeUUID>): List<NodeUUID> => {
+            const nodeIsUnvisitedBlock = (id, attributes) => {
+                const nodeIsBlock = attributes.nodeType === NodeType.Block;
+                const nodeIsUnvisited = !(chain.includes(id));
+                return nodeIsBlock && nodeIsUnvisited;
+            }
+
+            const nextChain: List<NodeUUID>= List(this.graph
+                .filterNeighbors(chain.get(-1), nodeIsUnvisitedBlock)
+            );
+            
+            if (nextChain.size === 0) return chain;
+            
+            console.log("about to return the recursive case");
+            return addChainTail(chain.push(nextChain.get(0)));
+        };
+
+
+
+        const nodeIds: List<List<NodeUUID>> = rootBlockNodeIds.map((id: NodeUUID) => {
+            return addChainTail(List([id]));
+        });
+
+        console.log("the chains got were", nodeIds.toString());
+
+        const blockIds: List<List<BlockUUID>> = nodeIds.map((chain: List<NodeUUID>) => {
+            return chain.map((nodeId: NodeUUID) => {
+                return this.graph.getNodeAttribute(nodeId, "blockUUID");
+            });
+        });
+
+        // Sort nodeIds based on block ids
+
+        const nodeIdsAndBlockIds: List<List<[NodeUUID, BlockUUID]>> = nodeIds.map((chainNodeIds, index) => {
+            const chainBlockIds = blockIds.get(index);
+            return chainNodeIds.zip(chainBlockIds);
+        });
+
+        const sortedNodeIdsAndBlockId: List<List<[NodeUUID, BlockUUID]>> = nodeIdsAndBlockIds.sort((chainA, chainB) => {
+            const getBlockIdString = (chain) => {
+                return chain.reduce((reduction, value) => `${reduction}${value}`)
+            };
+            const chainAString = getBlockIdString(chainA);
+            const chainBString = getBlockIdString(chainB);
+
+            return chainAString.localeCompare(chainBString);
+        })
+
+        const sortedNodeIds: List<List<NodeUUID>> = sortedNodeIdsAndBlockId.map((chain) => {
+            return chain.map((pair)=> {
+                return pair[0];
+            });
+        })
+
+        return sortedNodeIds
+
+    }
+
     getChain(actorId: number, chainIndex: number): List<BlockUUID> {
-        return List();
+        const chains = this.getChains(actorId)
+        if (chainIndex >= chains.size) return List();
+        return chains.get(chainIndex);
     }
 
 
@@ -103,13 +175,12 @@ export class Graph {
         });
     }
 
-    private addBlock(blockUUID) {
+    private addBlock(blockUUID: BlockUUID): NodeUUID {
         // block truth must be predetermined
         if (this.blockTruths.get(blockUUID) === undefined) return;
-        console.log("adding a new block!");
 
         const nodeUUID: NodeUUID = uuid();
-        const isTrue: boolean = this.blockTruths[blockUUID];
+        const isTrue: boolean = this.blockTruths.get(blockUUID);
         this.graph.addNode(nodeUUID, {
             x: Math.random() * 10,
             y: Math.random() * 10,
@@ -119,10 +190,27 @@ export class Graph {
             // custom attributes
             nodeType: NodeType.Block,
             nodeUUID: nodeUUID,
+            blockUUID: blockUUID,
         });
+
+        return nodeUUID;
     }
 
     private addBlockToActorAtChain(actorId: number, chainIndex: number, blockUUID: BlockUUID) {
+        console.log("##")
+
+        console.log("adding new block to actor", actorId, "on chain", chainIndex);
+        // Add new block
+        const nodeUUID = this.addBlock(blockUUID);
+        console.log("id of the new node is", nodeUUID)
+
+        // Link block to parent
+        const existingChain = this.getChain(actorId, chainIndex);
+        console.log("chain is", existingChain.toString());
+        const parentUUID = existingChain.size === 0 ? actorId : existingChain.get(-1);
+        console.log("parent is", parentUUID);
+
+        this.graph.addEdge(nodeUUID as string, parentUUID as string);
 
     }
 
