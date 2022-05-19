@@ -6,3 +6,4 @@ export async function fetchDigest(): Promise<Object> {
     const body = await response.json();
     return body;
 }
+

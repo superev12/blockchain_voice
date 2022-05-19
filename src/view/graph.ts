@@ -29,7 +29,9 @@ export class Graph {
         const container = document.getElementById("graphDiv");
 
         this.renderer = new Sigma(this.graph, container, {});
-        this.layout = new ForceSupervisor(this.graph);
+        this.layout = new ForceSupervisor(this.graph, {
+            settings: {gravity: 0, inertia: 0}
+        });
         this.layout.start();
 
         this.blockTruths = Map();

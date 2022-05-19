@@ -1,8 +1,9 @@
-import "path";
+import * as Path from "path";
 import {List, Set} from "immutable";
 
 import * as Networking from "./networking";
 import {Graph} from "./graph";
+import {Sound} from "./sound";
 import {getRandomInt, weightedRandom} from "./utils";
 
 console.log("Hello from the view script!");
@@ -22,6 +23,15 @@ console.log(actors);
 const graph = new Graph(actors);
 
 // Initialise sound
+const actorSounds = {};
+Object.keys(digest).forEach((id) => {
+    actorSounds[id] = {
+        truthSoundFilename: Path.join("sounds", digest[id].truthSoundFilename),
+        lieSoundFilename: Path.join("sounds", digest[id].lieSoundFilename),
+        communicateSoundFilename: Path.join("sounds", digest[id].communicateSoundFilename),
+    };
+});
+
 
 // Do action loop
 const actionLoop = () => {
@@ -50,7 +60,13 @@ const actionLoop = () => {
 
 }
 
-setInterval(actionLoop, 50);
+const onLoad = () => {
+    console.log("loaded!");
+    setInterval(actionLoop, 1000);
+}
+
+const sound = new Sound(actorSounds, onLoad);
+
 // DEBUG
 /*
 const actorId1 = graph.getActorIds()[0];
@@ -72,6 +88,7 @@ function doTruth() {
     const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorId) -1);
 
     console.log(`${actorId} adds a truth`);
+    sound.playTruth(actorId);
     graph.addTruth(actorId, chainIndex);
 }
 
@@ -82,6 +99,7 @@ function doLie() {
     const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorId) -1);
 
     console.log(`${actorId} adds a lie`);
+    sound.playLie(actorId);
     graph.addLie(actorId, chainIndex);
 }
 
@@ -96,6 +114,7 @@ function doCommunicate() {
     const toActorId = graph.getActorIds()[toActorIndex];
     
     console.log(`${fromActorId} communicates with ${toActorId}`);
+    sound.playCommunicate(fromActorId);
     graph.communicate(fromActorId, toActorId);
 }
 
