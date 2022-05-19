@@ -6,6 +6,8 @@ import {v4 as uuid} from "uuid";
 
 import {NodeUUID, BlockUUID, ActorID} from "./utils";
 
+
+
 const enum NodeType {Actor, Block}
 
 type BlockTruth = {
@@ -45,7 +47,39 @@ export class Graph {
 
         let chains = this.getChains(actorId);
 
-        console.log("chains before", chains.toString());
+        // Delete all but longest 
+        const maxChainLength = chains
+            .map((chain) => chain.size)
+            .reduce((r: number, item: number) => Math.max(r, item));
+        const shortChains = chains
+            .filter((chain) => chain.size < maxChainLength);
+        shortChains.forEach((chain) => 
+            chain.forEach((id: NodeUUID) => {
+                this.graph.dropNode(id);
+            }
+        ))
+
+        chains = this.getChains(actorId);
+
+        // Delete all foreign lies
+        const chainsWithForeignLies = chains.filter((chain) => 
+            chain.reduce((r: boolean, id: NodeUUID) => {
+                const creator = this.blockTruths.get(
+                    this.getBlockUUID(id)).creator;
+                return r || creator !== actorId;
+            }, false)
+        );
+        chainsWithForeignLies.forEach((chain) => 
+            chain.forEach((id: NodeUUID) => {
+                this.graph.dropNode(id);
+            }
+        ))
+    }
+
+    addTruth(actorId: ActorID, chainIndex: number) {
+        this.forceAddTruth(actorId, chainIndex);
+
+        let chains = this.getChains(actorId);
 
         // Delete all but longest 
         const maxChainLength = chains
@@ -60,7 +94,6 @@ export class Graph {
         ))
 
         chains = this.getChains(actorId);
-        console.log("chains after size discrimination", chains.toString());
 
         // Delete all foreign lies
         const chainsWithForeignLies = chains.filter((chain) => 
@@ -70,19 +103,11 @@ export class Graph {
                 return r || creator !== actorId;
             }, false)
         );
-        console.log("chains with foreign lies", chainsWithForeignLies.toString());
         chainsWithForeignLies.forEach((chain) => 
             chain.forEach((id: NodeUUID) => {
                 this.graph.dropNode(id);
             }
         ))
-        chains = this.getChains(actorId);
-        console.log("chains after nationality discrimination", chains.toString());
-
-    }
-
-    addTruth(actorId: ActorID, chainIndex: number) {
-        this.forceAddTruth(actorId, chainIndex);
     }
 
 

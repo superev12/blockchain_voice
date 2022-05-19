@@ -49,13 +49,15 @@ const actionLoop = () => {
 
 // setInterval(actionLoop, 5000);
 // DEBUG
-const actorId = graph.getActorIds()[0];
-graph.addLie(actorId, 0);
-graph.addTruth(actorId, 1);
-graph.addTruth(actorId, 0);
-//graph.addTruth(actorId, 1);
-//graph.addLie(actorId, 0);
-//graph.addLie(actorId, 2);
+const actorId1 = graph.getActorIds()[0];
+graph.addLie(actorId1, 0);
+graph.addTruth(actorId1, 1);
+graph.addTruth(actorId1, 1);
+const actorId2 = graph.getActorIds()[0];
+graph.addTruth(actorId2, 1);
+graph.addLie(actorId2, 0);
+graph.addLie(actorId2, 2);
+//graph.communicate(actorId1, actorId2);
 
 
 function doTruth() {
