@@ -28,9 +28,12 @@ const actionLoop = () => {
     console.log("doing the interval");
     // Pick an action
     enum Action {TRUE, LIE, COMMUNICATE}
-    const weights = [3, 1, 10];
-    //const nextAction: Action = weightedRandom(Object.values(Action), weights) as Action;
-    const nextAction = Action.TRUE;
+    const weights = [3, 0.2, 10];
+    const nextAction= weightedRandom(
+        [Action.TRUE, Action.LIE, Action.COMMUNICATE],
+        weights
+    );
+    console.log("next action is", nextAction);
 
     // Trigger the action
     switch (nextAction) {
@@ -47,34 +50,53 @@ const actionLoop = () => {
 
 }
 
-// setInterval(actionLoop, 5000);
+setInterval(actionLoop, 50);
 // DEBUG
+/*
 const actorId1 = graph.getActorIds()[0];
 graph.addLie(actorId1, 0);
 graph.addTruth(actorId1, 1);
 graph.addTruth(actorId1, 1);
-const actorId2 = graph.getActorIds()[0];
-graph.addTruth(actorId2, 1);
-graph.addLie(actorId2, 0);
+const actorId2 = graph.getActorIds()[1];
+graph.addTruth(actorId2, 0);
+graph.addLie(actorId2, 1);
 graph.addLie(actorId2, 2);
-//graph.communicate(actorId1, actorId2);
+graph.communicate(actorId1, actorId2);
+*/
 
 
 function doTruth() {
     // Pick actor to add truth to
-    const actorIndex = getRandomInt(0, graph.getNumberOfActors());
+    const actorIndex = getRandomInt(0, graph.getNumberOfActors()-1);
     const actorId = graph.getActorIds()[actorIndex];
     const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorId) -1);
 
+    console.log(`${actorId} adds a truth`);
     graph.addTruth(actorId, chainIndex);
 }
 
 function doLie() {
     // Pick actor to add lie to
-    const actorIndex = getRandomInt(0, graph.getNumberOfActors());
+    const actorIndex = getRandomInt(0, graph.getNumberOfActors()-1);
     const actorId = graph.getActorIds()[actorIndex];
     const chainIndex = getRandomInt(0, graph.getNumberOfChains(actorId) -1);
 
+    console.log(`${actorId} adds a lie`);
     graph.addLie(actorId, chainIndex);
 }
+
+function doCommunicate() {
+    // Pick two actors to communicate
+    const toActorIndex = getRandomInt(0, graph.getNumberOfActors()-1);
+    let fromActorIndex = getRandomInt(0, graph.getNumberOfActors()-1);
+    while (fromActorIndex === toActorIndex) {
+        fromActorIndex = getRandomInt(0, graph.getNumberOfActors()-1);
+    }
+    const fromActorId = graph.getActorIds()[fromActorIndex];
+    const toActorId = graph.getActorIds()[toActorIndex];
+    
+    console.log(`${fromActorId} communicates with ${toActorId}`);
+    graph.communicate(fromActorId, toActorId);
+}
+
 

@@ -45,73 +45,48 @@ export class Graph {
     addLie(actorId: ActorID, chainIndex: number) {
         this.forceAddLie(actorId, chainIndex);
 
-        let chains = this.getChains(actorId);
-
-        // Delete all but longest 
-        const maxChainLength = chains
-            .map((chain) => chain.size)
-            .reduce((r: number, item: number) => Math.max(r, item));
-        const shortChains = chains
-            .filter((chain) => chain.size < maxChainLength);
-        shortChains.forEach((chain) => 
-            chain.forEach((id: NodeUUID) => {
-                this.graph.dropNode(id);
-            }
-        ))
-
-        chains = this.getChains(actorId);
-
-        // Delete all foreign lies
-        const chainsWithForeignLies = chains.filter((chain) => 
-            chain.reduce((r: boolean, id: NodeUUID) => {
-                const creator = this.blockTruths.get(
-                    this.getBlockUUID(id)).creator;
-                return r || creator !== actorId;
-            }, false)
-        );
-        chainsWithForeignLies.forEach((chain) => 
-            chain.forEach((id: NodeUUID) => {
-                this.graph.dropNode(id);
-            }
-        ))
+        this.deleteShortChains(actorId);
+        this.deleteForeignLies(actorId);
     }
 
     addTruth(actorId: ActorID, chainIndex: number) {
         this.forceAddTruth(actorId, chainIndex);
 
-        let chains = this.getChains(actorId);
-
-        // Delete all but longest 
-        const maxChainLength = chains
-            .map((chain) => chain.size)
-            .reduce((r: number, item: number) => Math.max(r, item));
-        const shortChains = chains
-            .filter((chain) => chain.size < maxChainLength);
-        shortChains.forEach((chain) => 
-            chain.forEach((id: NodeUUID) => {
-                this.graph.dropNode(id);
-            }
-        ))
-
-        chains = this.getChains(actorId);
-
-        // Delete all foreign lies
-        const chainsWithForeignLies = chains.filter((chain) => 
-            chain.reduce((r: boolean, id: NodeUUID) => {
-                const creator = this.blockTruths.get(
-                    this.getBlockUUID(id)).creator;
-                return r || creator !== actorId;
-            }, false)
-        );
-        chainsWithForeignLies.forEach((chain) => 
-            chain.forEach((id: NodeUUID) => {
-                this.graph.dropNode(id);
-            }
-        ))
+        this.deleteShortChains(actorId);
+        this.deleteForeignLies(actorId);
     }
 
 
-    communicate() {}
+    communicate(fromActorId: ActorID, toActorId: ActorID) {
+        if (toActorId === fromActorId) return;
+
+        // Append new chains in fromActor to toActor
+
+        const chainsNodeIdsToBlockIds = (chains) => {
+            return chains.map((chain) => {
+                return chain.map((nodeId) => {
+                    return this.getBlockUUID(nodeId);
+                });
+            })
+        };
+
+        const fromChainsBlockIds = chainsNodeIdsToBlockIds(
+            this.getChains(fromActorId)
+        );
+        const toChainsBlockIds = chainsNodeIdsToBlockIds(
+            this.getChains(toActorId)
+        );
+
+        const chainsToSend = fromChainsBlockIds
+            .filter((chain) => !toChainsBlockIds.contains(chain));
+
+        console.log("preparing to send chains", chainsToSend.toString());
+        chainsToSend.forEach((chain) => this.appendChainToActor(chain, toActorId));
+
+        // Validate
+        this.deleteForeignLies(toActorId);
+        this.deleteShortChains(toActorId);
+    }
 
     // Access instructions
     getActorIds(): List<ActorID> {
@@ -200,8 +175,7 @@ export class Graph {
             });
         })
 
-        return sortedNodeIds
-
+        return sortedNodeIds;
     }
 
     getChain(actorId: ActorID, chainIndex: number): List<NodeUUID> {
@@ -211,9 +185,37 @@ export class Graph {
     }
 
 
-
-
     // Private instructions
+
+    private deleteForeignLies(actorId: ActorID) {
+        const chains = this.getChains(actorId);
+        const chainsWithForeignLies = chains.filter((chain) => 
+            chain.reduce((r: boolean, id: NodeUUID) => {
+                const creator = this.blockTruths.get(
+                    this.getBlockUUID(id)).creator;
+                return r || creator !== actorId;
+            }, false)
+        );
+        chainsWithForeignLies.forEach((chain) => 
+            chain.forEach((id: NodeUUID) => {
+                this.graph.dropNode(id);
+            }
+        ))
+    }
+
+    private deleteShortChains(actorId: ActorID) {
+        const chains = this.getChains(actorId);
+        const maxChainLength = chains
+            .map((chain) => chain.size)
+            .reduce((r: number, item: number) => Math.max(r, item));
+        const shortChains = chains
+            .filter((chain) => chain.size < maxChainLength);
+        shortChains.forEach((chain) => 
+            chain.forEach((id: NodeUUID) => {
+                this.graph.dropNode(id);
+            }
+        ))
+    }
 
     private addActor(actorId: ActorID, displayName: string) {
         this.graph.addNode(actorId, {
@@ -247,6 +249,19 @@ export class Graph {
         });
 
         return nodeUUID;
+    }
+
+    private appendChainToActor(chain: List<BlockUUID>, actorId: ActorID) {
+        if (chain.size <= 0) return;
+
+        console.log("adding blocks", chain.toString());
+        const newBlockNodeIds = chain.map((blockId) => this.addBlock(blockId))
+        this.graph.addEdge(actorId, newBlockNodeIds.get(0));
+
+        const pairs = newBlockNodeIds.delete(-1)
+            .zip(newBlockNodeIds.delete(0));
+
+        pairs.forEach(([id1, id2]) => this.graph.addEdge(id1, id2));
     }
 
     private addBlockToActorAtChain(actorId: ActorID, chainIndex: number, blockUUID: BlockUUID) {
