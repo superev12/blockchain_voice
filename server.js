@@ -22,13 +22,7 @@ app.use(webpackDevMiddleware(compiler, {
 app.use(webpackHotMiddleware(compiler));
 
 
-
 app.get("/", (req, res) => {
-    //res.sendFile(path.join(__dirname, "dist/index.html"));
-    //res.send("Yo yo, what's up?");
-});
-
-app.get("/view", (req, res) => {
     res.sendFile(path.join(__dirname, "dist/view.html"));
 //    res.send("This is the view");
 });
